@@ -21,10 +21,17 @@ class ItemCate:
     def __init__(self,name):
         self.name = name
         self.itemlist: Set[archINVIN] = set()
-        self.subcate: Set["Category"] = set()
+        self.subcate: Set[Category] = set()
 
     def get_name(self):
         return self.name
     def get_itemlist(self):
         return self.itemlist
+    def get_subcate(self):
+        return self.subcate
+    def add_item(self, item:ArchINVIN):
+        self.itemlist.append(item)
+    def add_subcate(self, subcate : Category):
+        self.itemlist.append(subcate)
+
 
