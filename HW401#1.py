@@ -34,4 +34,8 @@ class ItemCate:
     def add_subcate(self, subcate : Category):
         self.itemlist.append(subcate)
 
-
+class Volleyball(archINVIN):
+    def __init__ (self, material, size, NetType):
+        self.material = material
+        self.size = size
+        self.NetType = NetType 
