@@ -40,7 +40,7 @@ class Volleyball(archINVIN):
         self.material = material
         self.VolleyBallsize = VolleyBallsize
     def over(self):
-        print("VolleyBall -> Name: ",self.name, "Price: ", self.price, " Avability: ", self.availability,"Material: ",self.material,"Size: ",self.VolleyBallsize )
+        print("VolleyBall -> Name: ",self.name, " Price: ", self.price, " Avability: ", self.availability," Material: ",self.material," Size: ",self.VolleyBallsize )
 
 
 class VolleyballNET(archINVIN):
@@ -48,7 +48,7 @@ class VolleyballNET(archINVIN):
         super().__init__( name, price, availability)
         self.NetType = NetType
     def over(self):
-        print("VolleyBall Net -> Name: ",self.name, "Price: ", self.price, " Avability: ", self.availability,"Type: ",self.NetType )
+        print("VolleyBall Net -> Name: ",self.name, " Price: ", self.price, " Avability: ", self.availability," Type: ",self.NetType )
 
 class Table(archINVIN):
     def __init__ (self, name, price, availability, Tablesize):
@@ -57,7 +57,7 @@ class Table(archINVIN):
     def over(self):
         if self.availability == 0:
             print("Not enough tables to play table tennis")        
-        print("Table -> Name: ",self.name, "Price: ", self.price, " Avability: ", self.availability,"Size: ",self.Tablesize )  
+        print("Table -> Name: ",self.name, " Price: ", self.price, " Avability: ", self.availability," Size: ",self.Tablesize )  
         
 
 class Paddle(archINVIN):
@@ -65,7 +65,7 @@ class Paddle(archINVIN):
         super().__init__( name, price, availability)
         self.PaddleType = PaddleType
     def over(self):
-        print("Table tennis paddle -> Name: ",self.name, "Price: ", self.price, " Avability: ", self.availability,"Type: ",self.PaddleType )
+        print("Table tennis paddle -> Name: ",self.name, " Price: ", self.price, " Avability: ", self.availability," Type: ",self.PaddleType )
         if self.availability < 2:
             print("Not enough Paddles to play table tennis")
 
@@ -74,7 +74,7 @@ class TableBall(archINVIN):
     def __init__ (self, name, price, availability,):
         super().__init__( name, price, availability)
     def over(self):
-        print("Table tennis ball -> Name: ",self.name, "Price: ", self.price, " Avability: ", self.availability)
+        print("Table tennis ball -> Name: ",self.name, " Price: ", self.price, " Avability: ", self.availability)
         if self.availability == 0:
             print("Not enough balls to play table tennis")    
 
@@ -86,7 +86,7 @@ class Tent(archINVIN):
         self.Tentsize = Tentsize
         self.weather_rating = weather_rating
     def over(self):
-        print("Tent -> Name: ",self.name, "Price: ", self.price, " Avability: ", self.availability,"Size: ",self.Tentsize, "Weather Rating: ",self.weather_rating, "Durability: ",self.durability )
+        print("Tent -> Name: ",self.name, " Price: ", self.price, " Avability: ", self.availability," Size: ",self.Tentsize, " Weather Rating: ",self.weather_rating, " Durability: ",self.durability )
 
 
 class Soccerball(archINVIN):
@@ -119,7 +119,17 @@ class SoccerNET(archINVIN):
             self.price = self.price * .70  
         print("Soccerball Goal Net -> Name: ",self.name, "Price: ", self.price, " Avability: ", self.availability,"Size: ",self.SoccerSize )
 
+def Sell(item ,amount):
+        if item.availability >= amount:
+            item.availability = item.availability - amount
+            print("Sold", amount, item.name)
+        else:
+            print("Not enough Stock")
 
+def Add(item,amount):
+    
+    item.availability = item.availability + amount
+    print("New stock of", item.name, " is: ", item.availability)
 
 
 
@@ -134,7 +144,7 @@ Outdoor_Sports = ItemCate("Outdoor Sports")
 Volley_Ball = Volleyball("Super Cool Volleyball", 67, 4, "metal", "large")
 Volley_Net = VolleyballNET("Normal Volleyball Net", 15, 6, "rope")
 Table_ = Table("Table Tenis basic Table", 200, 3, "large")
-Paddle_ = Paddle("Worn Down paddle", 6, 1, "Beginner")
+Paddle_ = Paddle("Worn Down paddle", 6, 10, "Beginner")
 Table_T_Ball = TableBall("4 pck of Balls", 4, 10)
 
 Camp_tent = Tent("Extreme Tent", 400, 1, "Exremely Durable", "Large","Suited for extreme Weather")
@@ -150,3 +160,14 @@ Indoor_Sports.add_item(Table_T_Ball)
 Outdoor_Sports.add_item(Camp_tent)
 Outdoor_Sports.add_item(Soccer_Ball)
 Outdoor_Sports.add_item(Soccer_Net)
+
+
+for item in Indoor_Sports.get_itemlist():
+    item.over()
+
+for item in Outdoor_Sports.get_itemlist():
+    item.over()    
+
+
+Sell(Paddle_, 2)
+Add(Table_, 5)
