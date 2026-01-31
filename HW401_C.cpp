@@ -14,6 +14,7 @@ public:
 public:
 
 	archINVIN(string name , double price, int availability) : name(name), price(price), availability(availability) {}
+	
 	virtual void over() = 0;
 
 	string get_name() {
@@ -72,6 +73,7 @@ class Volleyball : public archINVIN {
 public:
 
 	Volleyball(string name, double price, int availability, string material, string VolleyBallsize) : archINVIN(name, price, availability), material(material), VolleyBallsize(VolleyBallsize) {}
+	
 	void over() override {
 		cout << "VolleyBall -> Name: " << name << " Price: " << price << " Avability: " << availability << " Material: " << material  << " Size: " << VolleyBallsize << "\n";
 	}
@@ -84,6 +86,7 @@ class VolleyballNET : public archINVIN {
 public:
 
 	VolleyballNET(string name, double price, int availability, string NetType) : archINVIN(name, price, availability), NetType(NetType) {}
+	
 	void over() override {
 		cout << "VolleyBall Net -> Name: " << name<< " Price: " << price<< " Avability: " << availability << " Type: " << NetType << "\n";
 	}
@@ -96,8 +99,11 @@ class Table : public archINVIN {
 public:
 
 	Table(string name, double price, int availability, string Tablesize) : archINVIN(name, price, availability), Tablesize(Tablesize) {}
+	
 	void over() override {
+		
 		cout << "Table -> Name: " << name << " Price: " << price << " Avability: " << availability << " Size: " << Tablesize << "\n";
+		
 		if (availability == 0)
 			cout << "Not enough tables to play table tennis" << "\n";
 	}
@@ -110,8 +116,11 @@ class Paddle : public archINVIN {
 public:
 
 	Paddle(string name, double price, int availability, string PaddleType) : archINVIN(name, price, availability), PaddleType(PaddleType) {}
+	
 	void over() override {
+		
 		cout << "Table tennis paddle -> Name: " << name << " Price: " << price << " Avability: " << availability << " Type: " << PaddleType << "\n";
+		
 		if (availability < 2)
 			cout << "Not enough Paddles to play table tennis" << "\n";
 	}
@@ -121,10 +130,14 @@ class TableBall : public archINVIN {
     
 public:
 	TableBall(string name, double price, int availability) : archINVIN(name, price, availability) {}
+	
 	void over() override {
+	    
 		cout << "Table tennis ball -> Name: " << name << " Price: " << price << " Avability: " << availability << "\n";
+		
 		if (availability == 0)
 			cout << "Not enough balls to play table tennis" << "\n";
+			
 	}
 };
 
@@ -138,6 +151,7 @@ class Tent : public archINVIN {
 public:
 
 	Tent(string name , double price, int availability, string durability, string weather_rating, string Tentsize) : archINVIN(name, price, availability), durability(durability), weather_rating(weather_rating), Tentsize(Tentsize) {}
+	
 	void over() override {
 		cout << "Tent -> Name: " << name << " Price: " << price << " Avability: " << availability << " Size: " << Tentsize << " Weather Rating: " << weather_rating << " Durability: " << durability << "\n";
 		
@@ -148,6 +162,7 @@ class Soccerball : public archINVIN {
     
 	string Soccermaterial;
 	int teamsize;
+	
 public:
 
 	Soccerball(string name , double price, int availability, string Soccermaterial, int teamsize) : archINVIN(name, price, availability), Soccermaterial(Soccermaterial), teamsize(teamsize) {}
