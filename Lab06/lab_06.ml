@@ -57,9 +57,9 @@ let myFoldl op acc lst =
         - acc: an accumulator
         - lst: a list of values
 *)
-let myFoldr op acc lst =
+let myFoldr op lst acc =
   let result = ref acc in          
-  List.iter |> List.iter (fun x -> result := op !result x) lst;
+  List.rev lst |> List.iter (fun x -> result := op x !result );
   !result
 
 
@@ -81,12 +81,14 @@ let myFoldr op acc lst =
     doesn't. We will go into the difference between the two next week,
     but for now just implement whichever makes more sense in your head. 
 *)
-let myReverse ?(acc=[]) lst =
-    raise (Failure "TODO: implement myReverse")
+let rec myReverse ?(acc=[]) lst =
+  match lst with
+  | [] -> acc
+  | start :: end0  -> myReverse ~acc:(start :: acc) end0
 
 
 let myReverseFold lst =
-    raise (Failure "TODO: implement myReverseFold")
+  myFoldl (fun acc x -> x :: acc) [] lst
     
 
 (*
@@ -108,12 +110,12 @@ let myReverseFold lst =
     doesn't. We will go into the difference between the two next week,
     but for now just implement whichever makes more sense in your head. 
 *)
-let myMap ?(acc=[]) op lst =
-    raise (Failure "TODO: implement myMap")
-
-
+let rec myMap ?(acc=[]) op lst =
+    match lst with
+    | [] -> List.rev acc
+    | head :: end0 -> myMap ~acc:(op head :: acc) op end0
 let myMapFold op lst =
-    raise (Failure "TODO: implement myMapFold")
+     myFoldr (fun x acc -> (op x) :: acc) lst []
 
 
 (*
@@ -135,19 +137,56 @@ let myMapFold op lst =
     doesn't. We will go into the difference between the two next week,
     but for now just implement whichever makes more sense in your head. 
 *)
-let myFilter ?(acc=[]) guard lst =
-    raise (Failure "TODO: implement myMap")
+let rec myFilter ?(acc=[]) guard lst =
+    match lst with
+    | [] -> List.rev acc 
+    | head :: end0 -> 
+        if guard head then
+            myFilter ~acc:(head :: acc) guard end0
+        else
+            myFilter ~acc:acc guard end0
+
 
 
 let myFilterFold guard lst =
-    raise (Failure "TODO: implement myMapFold")
-
+    
+    myFoldr (fun x acc -> if guard x then x :: acc else acc) lst []
 
 
 let () =
-  let func1 = myFoldl (+) 0 [1;2;3;4;5] in
-  Printf.printf " Fold Left to Right is: %d\n " func1
+    let func1 = myFoldl (+) 0 [1;2;3;4;5] in
+    Printf.printf " Fold Left to Right is: %d\n " func1;
 
-  let func2 = myFoldr_loop (+) [1;2;3;4;5] 0 in
-  Printf.printf "Fold Right to left is:  %d\n" func2
+    let func2 = myFoldr (+) [1;2;3;4;5] 0 in
+    Printf.printf "Fold Right to left is:  %d\n" func2;
 
+    let func3 = myReverse [1;2;3;4;5] in
+    print_string "Reverse of the list (non-fold) is: \n";
+    List.iter (Printf.printf "%d ") func3;
+    print_newline ();
+
+
+    let func4 = myReverseFold [1;2;3;4;5] in
+    print_string "Reverse of the list (fold) is: \n";
+    List.iter (Printf.printf "%d ") func4;
+    print_newline ();  
+
+    let func5 = myMap (fun x -> x + 1) [1;2;3;4;5] in
+    print_string "Map (non-fold) when its x + 1 is: \n";
+    List.iter (Printf.printf "%d ") func5;
+    print_newline ();
+    
+    let func6 = myMapFold (fun x -> x + 1) [1;2;3;4;5] in
+    print_string "Map (fold) when its x + 1 is: \n";
+    List.iter (Printf.printf "%d ") func6;
+    print_newline ();
+    
+    let func7 = myFilter (fun x -> x mod 2 = 0) [1;2;3;4;5] in
+    print_string "Filter (non-fold) for even numbers is : \n";
+    List.iter (Printf.printf "%d ") func7;
+    print_newline ();
+    
+    let func8 = myFilterFold (fun x -> x mod 2 = 0) [1;2;3;4;5] in
+    print_string "Filter (fold) for even numbers is: \n ";
+    List.iter (Printf.printf "%d ") func8;
+    print_newline ()
