@@ -50,9 +50,10 @@ let rec fibTail (a, b, n)  =
   match n with
   |   0 -> a
   |   1 -> b
-  |   _ -> fibTail(b, a + b, n - 1);
+  |   _ -> fibTail(b, a + b, n - 1)
 
 
 let () = 
   Printf.printf "Fib non recursion: %d " (fib 10);
+  print_newline ();  
   Printf.printf "Fib recursion: %d\n" (fibTail (0, 1, 10))
