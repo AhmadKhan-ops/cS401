@@ -40,8 +40,19 @@
 
 *)
 let rec fib n=
-  raise (Failure "TODO: implement fib")
+  match n with
+  |   0 -> 0
+  |   1 -> 1
+  |   _ -> fib(n-1) + fib(n-2)
+  
 
-let rec fibTail ?(a=0) ?(b=1) n =
-  raise (Failure "TODO: implement fibTail")
+let rec fibTail(a, b, n)  =
+  match n with
+  |   0 -> a
+  |   1 -> b
+  |   _ -> fibTail(b, a + b, n - 1);
 
+
+let () = 
+  Printf.printf " Fib non recursion: %d " i (fib i)
+  Printf.printf " Fib  recursion: %d " i (fibTail i)
