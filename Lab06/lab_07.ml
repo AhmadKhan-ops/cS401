@@ -39,14 +39,14 @@
       - n: the integer you must calculate fib(n) of
 
 *)
-let rec fib n=
+let rec fib n =
   match n with
   |   0 -> 0
   |   1 -> 1
   |   _ -> fib(n-1) + fib(n-2)
   
 
-let rec fibTail(a, b, n)  =
+let rec fibTail (a, b, n)  =
   match n with
   |   0 -> a
   |   1 -> b
@@ -54,5 +54,5 @@ let rec fibTail(a, b, n)  =
 
 
 let () = 
-  Printf.printf " Fib non recursion: %d " i (fib i)
-  Printf.printf " Fib  recursion: %d " i (fibTail i)
+  Printf.printf "Fib non recursion: %d " (fib 10);
+  Printf.printf "Fib recursion: %d\n" (fibTail (0, 1, 10))
