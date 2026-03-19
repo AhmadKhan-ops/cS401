@@ -1,0 +1,4 @@
+(test
+ (name getBacklinks)
+ (modules getBacklinks)
+ (libraries pagerank alcotest))

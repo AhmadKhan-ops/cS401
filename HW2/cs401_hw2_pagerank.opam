@@ -1,0 +1,5 @@
+opam-version: "2.0"
+synopsis: "Homework 2 for CS401/501"
+description: "Implementing Google's original PageRank algorithm in OCaml"
+maintainer: ["Akshar Patel <akshar20@uab.edu>"]
+authors: ["Akshar Patel <akshar20@uab.edu>" "Michael Gathara <mikegtr@uab.edu>"]

@@ -1,0 +1,4 @@
+(test
+ (name sumToOne)
+ (modules sumToOne)
+ (libraries pagerank alcotest))

@@ -1,0 +1,4 @@
+(test
+ (name stepPageRank)
+ (modules stepPageRank)
+ (libraries pagerank alcotest))

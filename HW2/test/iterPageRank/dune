@@ -1,0 +1,4 @@
+(test
+ (name iterPageRank)
+ (modules iterPageRank)
+ (libraries pagerank alcotest))
