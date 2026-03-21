@@ -98,7 +98,7 @@ let numLinks graph page =
 
 
 
-(*
+
 (*
    getBacklinks: Computes the set of pages that link to the given page.
    For example, in the graph [("n0", "n1"); ("n1", "n2"); ("n0", "n2")] and
@@ -111,8 +111,33 @@ let numLinks graph page =
      - PageSet.t (set of strings) representing all pages that link to
        the given page
 *)
+
+
+
+
+
+
+
+
+
+
 let getBacklinks graph page =
-    raise (Failure "TODO: implement getBacklinks")
+    
+  List.fold_left(fun node (a, b) ->
+    if b = page then PageSet.add a node else node
+  ) PageSet.empty graph
+
+
+
+
+
+
+
+
+
+
+
+
 
 (*
    initPageRank: Generates the initial PageRank for the given graph.
@@ -123,9 +148,25 @@ let getBacklinks graph page =
    Output: a PageRank map (string -> float) with each page mapped to its
    initial rank (1/N)
 *)
-let initPageRank graph =
-    raise (Failure "TODO: implement initPageRank")
 
+
+
+let initPageRank graph =
+   
+  let n = float_of_int(numPages graph) in
+  let rank_val = 1.00 /. n in
+  let pagerank_graph = ref PageRank.empty in
+
+  List.iter (fun (a,b) ->
+
+    pagerank_graph:= PageRank.add a rank_val !pagerank_graph;   
+    pagerank_graph := PageRank.add b rank_val !pagerank_graph 
+  ) graph;
+
+  !pagerank_graph
+
+
+(*
 (*
    stepPageRank: Performs one iteration step of the PageRank algorithm
    on the graph, updating every page with a new weight.
