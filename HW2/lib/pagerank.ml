@@ -166,7 +166,7 @@ let initPageRank graph =
   !pagerank_graph
 
 
-(*
+
 (*
    stepPageRank: Performs one iteration step of the PageRank algorithm
    on the graph, updating every page with a new weight.
@@ -189,7 +189,50 @@ let initPageRank graph =
        of the algorithm
 *)
 let stepPageRank pr d graph =
-    raise (Failure "TODO: implement stepPageRank")
+   let n = float_of_int (numPages graph) in
+   let step_pr = ref PageRank.empty in
+   let pages = ref [] in
+
+   List.iter (fun (a, b) ->
+      if not (List.mem a !pages) then 
+        pages := a :: !pages;
+      if not (List.mem b !pages) then 
+        pages := b :: !pages;
+  ) graph;
+  
+List.iter (fun page ->
+  let backtrack = getBacklinks graph page in
+  let backtrack_list = PageSet.elements backtrack in
+  let s = ref 0.0 in
+
+  List.iter(fun target_pg->
+    s := (PageRank.find target_pg pr /. float_of_int(numLinks graph target_pg)) +. !s
+  ) backtrack_list;
+  let s_total = !s in
+
+  let final_rank = ((1.0 -. d ) /. n) +. (d *. s_total) in 
+  step_pr := PageRank.add page final_rank !step_pr
+) !pages;
+! step_pr
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(*
 
 (*
    iterPageRank: Iterates the PageRank algorithm until convergence.
