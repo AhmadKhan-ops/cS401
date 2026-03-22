@@ -221,19 +221,6 @@ List.iter (fun page ->
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-(*
-
 (*
    iterPageRank: Iterates the PageRank algorithm until convergence.
    The function repeatedly applies the stepPageRank function until
@@ -250,8 +237,30 @@ List.iter (fun page ->
      - a converged PageRank map (string -> float) where the maximum
        rank change is below delta
 *)
+
+
+
+
 let iterPageRank pr d graph delta =
-    raise (Failure "TODO: implement iterPageRank")
+  let rec loop temp_pr =
+    let new_pr = stepPageRank temp_pr d graph in 
+
+    let threshold_max = ref 0.0 in
+    PageRank.iter (fun page rank -> 
+
+      let new_rank = PageRank.find page new_pr in
+      let max_differ = abs_float (new_rank -. rank) in
+
+      if max_differ > !threshold_max then
+        threshold_max := max_differ
+    ) temp_pr;
+    if !threshold_max < delta then
+      new_pr
+    else
+      loop new_pr
+  in
+
+  loop pr 
 
 (*
    rankPages: Produces a ranked list of pages from the PageRank map.
@@ -264,5 +273,9 @@ let iterPageRank pr d graph delta =
    their rank values
 *)
 let rankPages pr =
-    raise (Failure "TODO: implement rankPages")
-*)
+  let mapped_page = List.map fst (PageRank.bindings pr) in
+  List.sort ( fun rank_a rank_b  -> 
+    let a = PageRank.find rank_b pr in
+    let b = PageRank.find rank_b pr in
+    compare a b
+  ) mapped_page
