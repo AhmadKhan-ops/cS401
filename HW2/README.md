@@ -5,8 +5,9 @@
 - **I understand and have complied with the course policy on the use of AI tools.**
 - **I have read the UAB Academic Integrity Code and understand that any breach of this code may result in severe penalties, including failure of the class.**
 
-Name: <i><strong>PUT YOUR NAME HERE</strong></i>
+Name: <i><strong>Ahmad Khan</strong></i>
 
+I used AI to help me understand ocaml syntax and help me organize my thoughts about this lab
 # Project Deadline
 <strong>03/09/2024 11:59 CST</strong>
 
