@@ -37,7 +37,7 @@ int main() {
     }
 
     // time log
-    double start = omp_get_wtime();
+    double start_p = omp_get_wtime();
 
     // Parallel matrix multiplication
     #pragma omp parallel for private(j, k)
@@ -48,11 +48,25 @@ int main() {
             }
         }
     }
+     //timing
+     double end_p = omp_get_wtime();
+    double start_s = omp_get_wtime();
 
+    for (i = 0; i < N; i++) {
+        for (j = 0; j < P; j++) {
+            C[i][j] = 0.0;
+            for (k = 0; k < M; k++) {
+                C[i][j] += A[i][k] * B[k][j];
+            }
+        }
+    }
+
+    double end_s = omp_get_wtime();
     //timing
-    double end = omp_get_wtime();
 
-    printf("Time taken: %f seconds\n", end - start);
+
+    printf("Time taken for par: %f seconds\n", end_p - start_p);
+    printf("Time taken for serial: %f seconds\n", end_s - start_s);
 
     return 0;
 }
