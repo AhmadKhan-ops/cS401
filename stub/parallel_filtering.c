@@ -49,6 +49,10 @@ int main(int argc, char **argv) {
 
     // READ THE FILE IN PARALLEL
     double io_read_start = MPI_Wtime();
+
+
+
+
     // STEPS
     // How do you know where in file you want to read the data from
     // Need to compute "offset" in the file where one needs to read (hint: use
@@ -66,7 +70,15 @@ int main(int argc, char **argv) {
     // close
 
     // nprocs = 4
-    int of = (#total_file_size / nproc) * rank;
+
+
+    int total_file_size = gbs[0] * gbs[1];  
+    unsigned char *buffer = malloc(buffer_size); 
+    int of = (total_file_size / nprocs) * rank;
+ 
+
+
+
     P0 of = 0;
     p1 of = 25;
     p2 of = 50;
@@ -76,7 +88,7 @@ int main(int argc, char **argv) {
     pread(fp, (#total_file_size / nprocs), of, buffer);
     close
 
-        double io_read_end = MPI_Wtime();
+    double io_read_end = MPI_Wtime();
 
     // GHOST (HALO) CELL EXCHANGE
     double communication_start = MPI_Wtime();
