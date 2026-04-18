@@ -47,6 +47,7 @@ int main(int argc, char **argv) {
 
     printf("Rank %d nprocs %d\n", rank, nprocs);
 
+
     // READ THE FILE IN PARALLEL
     double io_read_start = MPI_Wtime();
 
@@ -79,9 +80,17 @@ int main(int argc, char **argv) {
     int buffer_size = total_file_size / nprocs; 
 
     unsigned char *buffer = malloc(buffer_size); 
+    if (!buffer) {
+       printf("Failed buffer output");
+
+    }
+    int ghost_size = (stencil_size / 2) * gbs[1] * sizeof(unsigned char);
 
     int fp = open(file_name, O_RDONLY);
-    pread(fp, buffer, buffer_size, of);
+    if (fp == -1) {
+       printf("Failed to open file \n",);
+    }
+    pread(fp, buffer + (rank == 0 ? 0 : ghost_size), buffer_size, of);
     close(fp);
    
 
@@ -114,17 +123,23 @@ int main(int argc, char **argv) {
         local_rows = local_rows + 2; 
     }
 
-    int read_offset = (rank == 0) ? 0 : halo_row;
-    
+
     int count = 0;
+
+    if (top >= 0){
+        MPI_Irecv(buffer, halo_row, MPI_UNSIGNED_CHAR, top, 0, MPI_COMM_WORLD, &reqs[count++]);
+    }
+    
     if(bot < nprocs) {
         int recieved_halorow = (rank == nprocs -1) ? rows_per : rows_per + 1;
 
         MPI_Irecv(buffer + (recieved_halorow  * gbs[1]), halo_row , MPI_UNSIGNED_CHAR, bot, 1, MPI_COMM_WORLD, &reqs[count++]);
     }
+
     if (top >= 0){
-        MPI_Irecv(buffer, halo_row, MPI_UNSIGNED_CHAR, top, 0, MPI_COMM_WORLD, &reqs[count++]);
+        MPI_Isend(buffer, halo_row, MPI_UNSIGNED_CHAR, top, 0, MPI_COMM_WORLD, &reqs[count++]);
     }
+
     if(bot < nprocs) {
         int sent_halorow;
         if (rank == nprocs -1)
@@ -134,9 +149,7 @@ int main(int argc, char **argv) {
 
         MPI_Isend(buffer + (sent_halorow  * gbs[1]), halo_row , MPI_UNSIGNED_CHAR, bot, 0, MPI_COMM_WORLD, &reqs[count++]);
     }    
-    if (top >= 0){
-        MPI_Isend(buffer, halo_row, MPI_UNSIGNED_CHAR, top, 0, MPI_COMM_WORLD, &reqs[count++]);
-    }
+
     if (count > 0) {
     MPI_Waitall(count, reqs, MPI_STATUSES_IGNORE);
     }
@@ -153,18 +166,21 @@ int main(int argc, char **argv) {
 
     int half_size = stencil_size / 2;
 
-    int sum = 0;
-    int loop_count = 0;
+ 
     unsigned char *blur_buffer = malloc(buffer_size);
-    for (int i = half_size; i < local_rows - half_size; i++) {
+
+    for (int i = half_size; i < rows_per - half_size; i++) {
         for (int j = half_size; j < gbs[1] - half_size; j++) {
+                int sum = 0;
+                int loop_count = 0;
             for (int k = -half_size; k <= half_size; k++) {
                 for (int l = -half_size; l <= half_size; l++) {
-                    sum = sum + buffer[(i + 1 + k) * gbs[1] + (j + l)];
+
+                    sum = sum + buffer[(i + k) * gbs[1] + (j + l)];
                     loop_count++;
                 }
             }
-            blur_buffer[i  * gbs[1] + j ] = sum / loop_count;
+            blur_buffer[i  * gbs[1] + j] = sum / loop_count;
         }
     }
     
@@ -206,7 +222,7 @@ int main(int argc, char **argv) {
             (compute_end - compute_start), (io_write_end - io_write_start));
     }
     free(buffer);
-
+    free(blur_buffer);
     MPI_Finalize();
 }
 
