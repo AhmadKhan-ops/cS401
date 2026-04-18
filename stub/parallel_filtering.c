@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
 
     int fp = open(file_name, O_RDONLY);
     if (fp == -1) {
-       printf("Failed to open file \n",);
+       printf("Failed to open file \n");
     }
     pread(fp, buffer + (rank == 0 ? 0 : ghost_size), buffer_size, of);
     close(fp);
