@@ -72,21 +72,18 @@ int main(int argc, char **argv) {
     // nprocs = 4
 
 
-    int total_file_size = gbs[0] * gbs[1];  
-    unsigned char *buffer = malloc(buffer_size); 
+    int total_file_size = gbs[0] * gbs[1];   
+
     int of = (total_file_size / nprocs) * rank;
+
     int buffer_size = total_file_size / nprocs; 
 
+    unsigned char *buffer = malloc(buffer_size); 
 
-
-    P0 of = 0;
-    p1 of = 25;
-    p2 of = 50;
-    p3 of = 75;
-
-    int fp = open(filename);
-    pread(fp, (#total_file_size / nprocs), of, buffer);
-    close
+    int fp = open(file_name, O_RDONLY);
+    pread(fp, buffer, buffer_size, of);
+    close(fp);
+   
 
     double io_read_end = MPI_Wtime();
 
@@ -104,47 +101,44 @@ int main(int argc, char **argv) {
 
     int top = rank - 1;
     int bot = rank + 1;
-    int halo_size = stencil_size / 2;
+
+
     int halo_row = gbs[1];
+    MPI_Request reqs[4];
+
 
     int local_rows = rows_per;
     if (rank == 0 || rank == nprocs - 1) {
-        local_rows += 1; 
+        local_rows = local_rows + 1; 
     } else {
-        local_rows += 2; 
+        local_rows = local_rows + 2; 
     }
-    unsigned char *recursive_buffer = malloc(local_rows * gbs[1] * sizeof(unsigned char));
-    if(rank == 0){
-        memcpy(recursive_buffer, buffer, local_rows * gbs[1] );
-    }
-    else {
-        memcpy(recursive_buffer + gbs[1], buffer, local_rows * gbs[1] );
-    }
-    }
+
+    int read_offset = (rank == 0) ? 0 : halo_row;
+    
     int count = 0;
     if(bot < nprocs) {
-        int recieved_halorow
-        if (rank == nprocs -1)
-            recieved_halorow = rows_per;
-        else
-            recieved_halorow = rows_per + 1;
+        int recieved_halorow = (rank == nprocs -1) ? rows_per : rows_per + 1;
 
-        MPI_Irecv(recursive_buffer + (recieved_halorow  * gbs[1]), halo_row , MPI_UNSIGNED_CHAR, bot, 1, MPI_COMM_WORLD, &count);
-    })
-    if (up> = 0){
-        MPI_Irecv(recursive_buffer, halo_row, MPI_UNSIGNED_CHAR, top, 0, MPI_COMM_WORLD, &count);
+        MPI_Irecv(buffer + (recieved_halorow  * gbs[1]), halo_row , MPI_UNSIGNED_CHAR, bot, 1, MPI_COMM_WORLD, &reqs[count++]);
+    }
+    if (top >= 0){
+        MPI_Irecv(buffer, halo_row, MPI_UNSIGNED_CHAR, top, 0, MPI_COMM_WORLD, &reqs[count++]);
     }
     if(bot < nprocs) {
-        int sent_halorow
+        int sent_halorow;
         if (rank == nprocs -1)
             sent_halorow = rows_per - 1;
         else
             sent_halorow = rows_per;
 
-        MPI_Isend(recursive_buffer + (sent_halorow  * gbs[1]), halo_row , MPI_UNSIGNED_CHAR, bot, 0, MPI_COMM_WORLD, &count);
-    })    
-    if (up> = 0){
-        MPI_Isend(recursive_buffer, halo_row, MPI_UNSIGNED_CHAR, top, 0, MPI_COMM_WORLD, &count);
+        MPI_Isend(buffer + (sent_halorow  * gbs[1]), halo_row , MPI_UNSIGNED_CHAR, bot, 0, MPI_COMM_WORLD, &reqs[count++]);
+    }    
+    if (top >= 0){
+        MPI_Isend(buffer, halo_row, MPI_UNSIGNED_CHAR, top, 0, MPI_COMM_WORLD, &reqs[count++]);
+    }
+    if (count > 0) {
+    MPI_Waitall(count, reqs, MPI_STATUSES_IGNORE);
     }
 
     double communication_end = MPI_Wtime();
@@ -157,10 +151,26 @@ int main(int argc, char **argv) {
     // step you need to use the ghost cell you obtained in the previous step
     double compute_start = MPI_Wtime();
 
+    int half_size = stencil_size / 2;
+
+    int sum = 0;
+    int loop_count = 0;
+    unsigned char *blur_buffer = malloc(buffer_size);
+    for (int i = half_size; i < local_rows - half_size; i++) {
+        for (int j = half_size; j < gbs[1] - half_size; j++) {
+            for (int k = -half_size; k <= half_size; k++) {
+                for (int l = -half_size; l <= half_size; l++) {
+                    sum = sum + buffer[(i + 1 + k) * gbs[1] + (j + l)];
+                    loop_count++;
+                }
+            }
+            blur_buffer[i  * gbs[1] + j ] = sum / loop_count;
+        }
+    }
+    
     double compute_end = MPI_Wtime();
 
     // WRITE THE FILE IN PARALLEL (EXACT OPPOSITE of THE FIRST STEP)
-    double io_write_start = MPI_Wtime();
     // STEPS
     // How do you know where in file you want to write the data to
     // Need to compute "offset" in the file where one needs to write (hint: use
@@ -171,6 +181,16 @@ int main(int argc, char **argv) {
     // without collectives (using MPI_write_read_at) MPI_File_open
     // MPI_File_write_at_all(..., offset, buffer, size, ..., MPI_UNSIGNED_CHAR,
     // ....) MPI_File_close()
+
+
+
+    double io_write_start = MPI_Wtime();
+    MPI_File fh;
+    MPI_File_open(MPI_COMM_WORLD, "brain_2560_2560_blurred.raw", MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
+    MPI_File_write_at_all(fh, of, blur_buffer, buffer_size, MPI_UNSIGNED_CHAR, MPI_STATUS_IGNORE);
+    MPI_File_close(&fh);
+
+
     double io_write_end = MPI_Wtime();
 
     double total_time = io_write_end - io_read_start;
@@ -185,6 +205,7 @@ int main(int argc, char **argv) {
             (communication_end - communication_start),
             (compute_end - compute_start), (io_write_end - io_write_start));
     }
+    free(buffer);
 
     MPI_Finalize();
 }
