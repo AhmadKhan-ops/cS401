@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
     int total_file_size = gbs[0] * gbs[1];  
     unsigned char *buffer = malloc(buffer_size); 
     int of = (total_file_size / nprocs) * rank;
- 
+    int buffer_size = total_file_size / nprocs; 
 
 
 
@@ -91,7 +91,6 @@ int main(int argc, char **argv) {
     double io_read_end = MPI_Wtime();
 
     // GHOST (HALO) CELL EXCHANGE
-    double communication_start = MPI_Wtime();
     // Allocate buffer to recieve data from neighboring process (hint: will
     // depend on the stencil point size), or use the local buffer of previous
     // step to recieve halo data Identify rank of neighboring process (hint:
@@ -99,15 +98,65 @@ int main(int argc, char **argv) {
     // and rank nprocs - 1, they will recieve and send data from only one
     // process instead of two processes Use MPI_Isend and MPI_Irecv for
     // communication You can or cannot use MPI datatypes for communication
+    double communication_start = MPI_Wtime();
+
+    int rows_per = gbs[0] / nprocs;
+
+    int top = rank - 1;
+    int bot = rank + 1;
+    int halo_size = stencil_size / 2;
+    int halo_row = gbs[1];
+
+    int local_rows = rows_per;
+    if (rank == 0 || rank == nprocs - 1) {
+        local_rows += 1; 
+    } else {
+        local_rows += 2; 
+    }
+    unsigned char *recursive_buffer = malloc(local_rows * gbs[1] * sizeof(unsigned char));
+    if(rank == 0){
+        memcpy(recursive_buffer, buffer, local_rows * gbs[1] );
+    }
+    else {
+        memcpy(recursive_buffer + gbs[1], buffer, local_rows * gbs[1] );
+    }
+    }
+    int count = 0;
+    if(bot < nprocs) {
+        int recieved_halorow
+        if (rank == nprocs -1)
+            recieved_halorow = rows_per;
+        else
+            recieved_halorow = rows_per + 1;
+
+        MPI_Irecv(recursive_buffer + (recieved_halorow  * gbs[1]), halo_row , MPI_UNSIGNED_CHAR, bot, 1, MPI_COMM_WORLD, &count);
+    })
+    if (up> = 0){
+        MPI_Irecv(recursive_buffer, halo_row, MPI_UNSIGNED_CHAR, top, 0, MPI_COMM_WORLD, &count);
+    }
+    if(bot < nprocs) {
+        int sent_halorow
+        if (rank == nprocs -1)
+            sent_halorow = rows_per - 1;
+        else
+            sent_halorow = rows_per;
+
+        MPI_Isend(recursive_buffer + (sent_halorow  * gbs[1]), halo_row , MPI_UNSIGNED_CHAR, bot, 0, MPI_COMM_WORLD, &count);
+    })    
+    if (up> = 0){
+        MPI_Isend(recursive_buffer, halo_row, MPI_UNSIGNED_CHAR, top, 0, MPI_COMM_WORLD, &count);
+    }
+
     double communication_end = MPI_Wtime();
 
     // PERFORM THE ACTUAL BLURING OPERATION
-    double compute_start = MPI_Wtime();
     // allocate a new buffer of size equal to local "buffer", that will store
     // the value of the blured image You can skip the border pixels for bluring.
     // Start from (1,1) to (25600 - 1, 25600 - 1) My pixel value = (my pixel
     // value) / 9 + (sum of all neigbor pixel value) / 9 To perform the previous
     // step you need to use the ghost cell you obtained in the previous step
+    double compute_start = MPI_Wtime();
+
     double compute_end = MPI_Wtime();
 
     // WRITE THE FILE IN PARALLEL (EXACT OPPOSITE of THE FIRST STEP)
